@@ -113,6 +113,36 @@ while($tier = mysqli_fetch_assoc($tier_result))
 {
 ?>
 
+<?php
+
+    $booked_sql = "
+    SELECT SUM(quantity) AS total_booked
+    FROM bookings
+    WHERE tier_id = ?
+    AND status = 'active'
+    ";
+
+    $booked_stmt = mysqli_prepare($conn, $booked_sql);
+
+    mysqli_stmt_bind_param($booked_stmt, "i", $tier['id']);
+
+    mysqli_stmt_execute($booked_stmt);
+
+    $booked_result = mysqli_stmt_get_result($booked_stmt);
+
+    $booked_data = mysqli_fetch_assoc($booked_result);
+
+    $total_booked = $booked_data['total_booked'];
+
+    if(!$total_booked)
+    {
+        $total_booked = 0;
+    }
+
+    $remaining_seats = $tier['total_seats'] - $total_booked;
+
+    ?>
+
 <div style="border:1px solid gray; padding:10px; margin-bottom:15px;">
 
     <h3>
@@ -134,6 +164,11 @@ while($tier = mysqli_fetch_assoc($tier_result))
     </p>
 
     <p>
+        <strong>Remaining Seats:</strong>
+        <?php echo $remaining_seats; ?>
+    </p>
+
+    <p>
         <strong>Sales Start:</strong>
         <?php echo $tier['sales_start']; ?>
     </p>
@@ -143,6 +178,16 @@ while($tier = mysqli_fetch_assoc($tier_result))
         <?php echo $tier['sales_end']; ?>
     </p>
 
+
+
+    <?php
+    if($remaining_seats <= 0)
+    {
+        echo "<h3>Sold Out</h3>";
+    }
+    else
+    {
+    ?>
 
     <form action="book_ticket.php" method="POST">
 
@@ -160,14 +205,14 @@ while($tier = mysqli_fetch_assoc($tier_result))
     </form>
 
 </div>
-
+    <?php
+    }
+    ?>
 <?php
 }
 ?>
 
-<a href="index.php">
-    Back to Events
-</a>
+<a href="index.php">Back to Events</a>
 
 </body>
 </html>
