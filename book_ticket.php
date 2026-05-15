@@ -20,7 +20,7 @@ if(!isset($_POST['user_id']))
     $tier_sql = "SELECT * FROM ticket_tiers WHERE id = ? AND event_id = ?";
 
     $tier_stmt = mysqli_prepare($conn, $tier_sql);
-    mysqli_stmt_bind_param($tier_stmt, "i", $tier_id, $event_id);
+    mysqli_stmt_bind_param($tier_stmt, "ii", $tier_id, $event_id);
     mysqli_stmt_execute($tier_stmt);
 
     $tier_result = mysqli_stmt_get_result($tier_stmt);
