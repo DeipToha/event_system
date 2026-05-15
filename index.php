@@ -38,8 +38,7 @@ Welcome,
 <?php echo $_SESSION['user_name']; ?>
 </p>
 
-<a href="my_ticket.php">My Tickets</a>
-<a href="logout.php">Logout</a>
+<a href="my_tickets.php">My Tickets</a> | <a href="logout.php">Logout</a>
 
 <hr>
 
