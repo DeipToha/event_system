@@ -143,6 +143,22 @@ while($tier = mysqli_fetch_assoc($tier_result))
         <?php echo $tier['sales_end']; ?>
     </p>
 
+
+    <form action="book_ticket.php" method="POST"> // add booking form to event page
+
+        <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
+        <input type="hidden" name="tier_id" value="<?php echo $tier['id']; ?>">
+
+        <label>Quantity:</label>
+        <br>
+        <input type="number" name="quantity" min="1" max="<?php echo $tier['total_seats']; ?>" required>
+        <br><br>
+
+        <button type="submit">
+            Book Now
+        </button>
+    </form>
+
 </div>
 
 <?php
