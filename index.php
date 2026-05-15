@@ -51,7 +51,9 @@ while($event = mysqli_fetch_assoc($result))
 <div style="border:1px solid black; padding:15px; margin-bottom:20px;">
 
     <h2>
+        <a href="event_details.php?id=<?php echo $event['id']; ?>">
         <?php echo $event['title']; ?>
+        </a>
     </h2>
 
     <p>
