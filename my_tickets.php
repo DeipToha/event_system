@@ -12,12 +12,26 @@ if(!isset($_SESSION['user_id']))
 $user_id = $_SESSION['user_id'];
 
 $sql = "
-    SELECT bookings.*, events.title AS event_title, events.event_datetime, events.city, events.banner_image_path
+    SELECT
+    bookings.*,
+    events.title AS event_title,
+    events.event_datetime,
+    events.city,
+    ticket_tiers.name AS tier_name
+
     FROM bookings
-    JOIN events ON bookings.event_id = events.id
-    WHERE attendee_id = ?
+
+    LEFT JOIN events
+    ON bookings.event_id = events.id
+
+    LEFT JOIN ticket_tiers
+    ON bookings.tier_id = ticket_tiers.id
+
+    WHERE bookings.attendee_id = ?
+
     ORDER BY bookings.created_at DESC
-";   
+    "
+;  
 
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -59,16 +73,24 @@ $result = mysqli_stmt_get_result($stmt);
                 <?php echo $booking['city']; ?>
             </p>
             <p>
+                <strong>Ticket Tier:</strong>
+                <?php echo $booking['tier_name']; ?>
+            </p>
+            <p>
                 <strong>Quantity:</strong>
                 <?php echo $booking['quantity']; ?>
             </p>
             <p>
                 <strong>Total Price:</strong>
-                $<?php echo number_format($booking['total_price'], 2); ?>
+                ৳<?php echo number_format($booking['total_price'], 2); ?>
             </p>
             <p>
                 <strong>Ticket Code:</strong>
                 <?php echo $booking['ticket_code']; ?>
+            </p>
+            <p>
+                <strong>Status:</strong>
+                <?php echo ucfirst($booking['status']); ?>
             </p>
         </div>
         <?php
@@ -79,6 +101,6 @@ $result = mysqli_stmt_get_result($stmt);
         echo "<p>No Booking Found.</p>";
     }
     ?>
-    
+
 </body>
 </html>
