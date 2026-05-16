@@ -5,6 +5,11 @@ class AnalyticsController {
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
 
+        // Validation 
+        if ($event_id <= 0) {
+            redirect('index.php?page=events');
+        }
+
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
@@ -36,7 +41,7 @@ class AnalyticsController {
         $capacity = $stmt5->get_result()->fetch_assoc()['total_capacity'] ?? 0;
         $occupancyRate = $capacity > 0 ? round(($summary['total_tickets'] / $capacity) * 100, 1) : 0;
 
-        // Repeat attendees (attended more than 1 event by this organiser)
+        // Repeat attendees
         $stmt6 = $db->prepare("
             SELECT u.name, u.email, COUNT(DISTINCT b.event_id) as events_attended
             FROM bookings b
