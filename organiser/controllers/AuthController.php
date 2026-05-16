@@ -4,10 +4,11 @@ require_once BASE_PATH . 'models/OrganiserModel.php';
 
 class AuthController {
 
-    public function login() {
-        if (isset($_SESSION['user_id'])) redirect('index.php?page=dashboard');
 
-        $error = null;
+    public function login() {
+            if (isset($_SESSION['user_id'])) redirect('index.php?page=dashboard');
+
+     $error = null;
         if (isPost()) {
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -58,7 +59,7 @@ class AuthController {
             } else {
                 $logo_path = null;
                 if (!empty($_FILES['org_logo']['name'])) {
-                    $logo_path = uploadFile($_FILES['org_logo'], BASE_PATH . 'public/uploads/logos/');
+                    $logo_path = uploadFile($_FILES['org_logo'], BASE_PATH . 'public/uploads/');
                 }
 
                 $hash = password_hash($password, PASSWORD_BCRYPT);
@@ -67,7 +68,7 @@ class AuthController {
                 $success = 'Registration successful! Please wait for admin approval before logging in.';
             }
         }
-        require BASE_PATH . 'views/organiser/auth/register.php';
+          require BASE_PATH . 'views/organiser/auth/register.php';
     }
 
     public function logout() {

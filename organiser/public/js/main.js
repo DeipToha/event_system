@@ -94,14 +94,14 @@ function initVenueTypeToggle() {
     toggle();
 }
 
-// ========== Confirm dialogs ==========
+// ========== Confirm dialogs =======
 document.addEventListener('click', function(e) {
     if (e.target.matches('[data-confirm]')) {
         if (!confirm(e.target.dataset.confirm)) { e.preventDefault(); }
     }
 });
 
-// ========== Auto-dismiss alerts ==========
+// ========== Auto-dismiss alerts ============
 setTimeout(function() {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(a => { a.style.opacity = '0'; a.style.transition = 'opacity 0.5s'; setTimeout(() => a.remove(), 500); });
