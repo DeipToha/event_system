@@ -31,6 +31,28 @@ if(!isset($_POST['user_id']))
         die("Invalid Ticket Tier");
     }
 
+
+    $booked_sql = "
+    SELECT SUM(quantity) AS total_booked
+    FROM bookings
+    WHERE tier_id = ?
+    AND status = 'active'
+    ";
+
+    $booked_stmt = mysqli_prepare($conn, $booked_sql);
+    mysqli_stmt_bind_param($booked_stmt, "i", $tier['id']);
+    mysqli_stmt_execute($booked_stmt);
+    $booked_result = mysqli_stmt_get_result($booked_stmt);
+    $booked_data = mysqli_fetch_assoc($booked_result);
+    $total_booked = $booked_data['total_booked'] ?? 0;
+
+    $remaining_seats = $tier['total_seats'] - $total_booked;
+
+    if($quantity > $remaining_seats)
+    {
+        die("Not enough seats available.");
+    }
+
     $total_price = $tier['price'] * $quantity;
     $ticket_code = strtoupper(uniqid("TICKET_"));
 

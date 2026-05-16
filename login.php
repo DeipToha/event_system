@@ -73,5 +73,14 @@ if(isset($_POST['login']))
 
 </form>
 
+<br>
+
+<p>
+    Don't have an account?
+    <a href="register.php">
+        Create Account
+    </a>
+</p>
+
 </body>
 </html>
