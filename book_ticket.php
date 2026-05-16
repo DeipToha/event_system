@@ -50,7 +50,9 @@ if(!isset($_POST['user_id']))
 
     if($quantity > $remaining_seats)
     {
-        die("Not enough seats available.");
+        echo "Not enough seats available.";
+        echo "<br><a href='index.php'>Back to Events</a>";
+        exit();
     }
 
     $total_price = $tier['price'] * $quantity;
