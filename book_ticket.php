@@ -70,6 +70,12 @@ if(!isset($_POST['user_id']))
         echo "Booking Successful.";
         echo "<br>";
         echo "Ticket Code: " . $ticket_code;
+        echo "<br>";
+
+        echo '<a href="my_tickets.php">View My Tickets</a>';
+
+
+        echo '<br><a href="index.php">Back to Events</a>';
     }
     else
     {
