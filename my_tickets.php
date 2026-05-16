@@ -88,6 +88,19 @@ $result = mysqli_stmt_get_result($stmt);
                 <strong>Ticket Code:</strong>
                 <?php echo $booking['ticket_code']; ?>
             </p>
+            <?php
+            if($booking['status'] == 'active')
+            {
+            ?>
+                <br>
+
+                <a href="cancel_booking.php?id=<?php echo $booking['id']; ?>">
+                    <button>Cancel Booking</button>
+                </a>
+
+            <?php
+            }
+            ?>
             <p>
                 <strong>Status:</strong>
                 <?php echo ucfirst($booking['status']); ?>
