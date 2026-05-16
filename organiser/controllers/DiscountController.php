@@ -18,7 +18,7 @@ class DiscountController {
         $codes = $stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
         $flash = getFlash();
         $db->close();
-        require 'views/organiser/discount/index.php';
+        require BASE_PATH . 'views/discount/index.php';
     }
 
     public function create() {
