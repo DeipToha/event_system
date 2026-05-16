@@ -40,6 +40,6 @@ class DashboardController {
         $pendingRequests = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
         $db->close();
-        require 'views/organiser/dashboard.php';
+        require 'views/dashboard.php';
     }
 }

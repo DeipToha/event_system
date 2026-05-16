@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Dashboard'; require 'views/organiser/layout/header.php'; ?>
+<?php $pageTitle = 'Dashboard'; require 'views/layout/header.php'; ?>
 
 <div class="stats-grid">
     <div class="stat-card">

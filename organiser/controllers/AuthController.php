@@ -31,7 +31,7 @@ class AuthController {
                 $error = 'Invalid email or password.';
             }
         }
-        require BASE_PATH . 'views/organiser/auth/login.php';
+        require BASE_PATH . 'views\auth\login.php';
     }
 
     public function register() {
