@@ -15,7 +15,6 @@ if(isset($_POST['register']))
             VALUES(?, ?, ?, ?, 'attendee')";
 
     $stmt = mysqli_prepare($conn, $sql);
-
     mysqli_stmt_bind_param(
         $stmt,
         "ssss",
