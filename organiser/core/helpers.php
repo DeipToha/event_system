@@ -1,54 +1,49 @@
 <?php
 
 
-// লগইন — session-এ user data সেট করে
+
 function loginUser($user) {
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['role']    = $user['role'];  // আপনার router 'role' চেক করছে
+     $_SESSION['user_id'] = $user['id'];
+    $_SESSION['role']    = $user['role'];  
     $_SESSION['name']    = $user['name'];
 }
-
-// লগআউট — session সম্পূর্ণ মুছে দেয়
 function logoutUser() {
     session_unset();
-    session_destroy();
+     session_destroy();
 }
 function redirect($url) {
     header("Location: $url");
-    exit;
+     exit;
 }
 
-
-
 function isPost() {
-    return $_SERVER['REQUEST_METHOD'] === 'POST';
+return $_SERVER['REQUEST_METHOD'] === 'POST';
 }
 
 function sanitize($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
+return htmlspecialchars(strip_tags(trim($data)));
 }
 
 function jsonResponse($data) {
     header('Content-Type: application/json');
     echo json_encode($data);
-    exit;
+     exit;
 }
 
 function uploadFile($file, $dir, $allowed = ['jpg','jpeg','png','gif']) {
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, $allowed)) return false;
-    $filename = uniqid() . '.' . $ext;
-    $target = $dir . $filename;
-    if (move_uploaded_file($file['tmp_name'], $target)) return $filename;
-    return false;
+       $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+       if (!in_array($ext, $allowed)) return false;
+        $filename = uniqid() . '.' . $ext;
+       $target = $dir . $filename;
+       if (move_uploaded_file($file['tmp_name'], $target)) return $filename;
+      return false;
 }
 
 function setFlash($type, $msg) {
-    $_SESSION['flash'] = ['type' => $type, 'msg' => $msg];
+      $_SESSION['flash'] = ['type' => $type, 'msg' => $msg];
 }
 
-function getFlash() {
-    if (isset($_SESSION['flash'])) {
+function getFlash() { if (isset($_SESSION['flash'])) {
         $f = $_SESSION['flash'];
         unset($_SESSION['flash']);
         return $f;
