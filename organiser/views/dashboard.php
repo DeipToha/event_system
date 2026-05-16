@@ -89,4 +89,4 @@
     </div>
 </div>
 
-<?php require 'views/organiser/layout/footer.php'; ?>
+<?php require 'views/layout/footer.php'; ?>
