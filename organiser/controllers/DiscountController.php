@@ -6,6 +6,9 @@ class DiscountController {
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
 
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
@@ -23,9 +26,16 @@ class DiscountController {
 
     public function create() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_POST['event_id'] ?? 0);
+
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
 
         $stmt = $db->prepare("SELECT id FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
@@ -37,9 +47,17 @@ class DiscountController {
         $max_uses     = (int)($_POST['max_uses'] ?? 1);
         $valid_until  = $_POST['valid_until'] ?? '';
 
-        if (!$code || $discount_pct <= 0 || $discount_pct > 100) {
-            setFlash('error', 'Invalid discount data.');
+        // Validation
+        if (!$code) {
+            setFlash('error', 'Discount code is required.');
+        } elseif (!isValidLength($code, 1, 50)) {
+            setFlash('error', 'Code must be under 50 characters.');
+        } elseif ($discount_pct <= 0 || $discount_pct > 100) {
+            setFlash('error', 'Discount percentage must be between 1 and 100.');
+        } elseif (!isPositiveInt($max_uses)) {
+            setFlash('error', 'Max uses must be at least 1.');
         } else {
+            $valid_until = $valid_until ?: null;
             $stmt2 = $db->prepare("INSERT INTO discount_codes (event_id, organiser_id, code, discount_pct, max_uses, valid_until) VALUES (?,?,?,?,?,?)");
             $stmt2->bind_param("iisdis", $event_id, $org_id, $code, $discount_pct, $max_uses, $valid_until);
             $stmt2->execute();
@@ -51,10 +69,19 @@ class DiscountController {
 
     public function toggle() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db = getDB();
-        $org_id  = $_SESSION['user_id'];
-        $code_id = (int)($_POST['code_id'] ?? 0);
-        $event_id= (int)($_POST['event_id'] ?? 0);
+        $org_id   = $_SESSION['user_id'];
+        $code_id  = (int)($_POST['code_id'] ?? 0);
+        $event_id = (int)($_POST['event_id'] ?? 0);
+
+        // Validation
+        if ($code_id <= 0 || $event_id <= 0) {
+            redirect('index.php?page=events');
+        }
 
         $stmt = $db->prepare("UPDATE discount_codes SET is_active = NOT is_active WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $code_id, $org_id);
