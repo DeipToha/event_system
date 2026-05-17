@@ -4,6 +4,8 @@ session_start();
 require_once BASE_PATH . 'config/database.php';
 require_once BASE_PATH . 'core/helpers.php';
 
+// CSRF token initialize 
+generateCsrfToken();
 // Auto-load controllers and models
 spl_autoload_register(function($class) {
     $paths = [

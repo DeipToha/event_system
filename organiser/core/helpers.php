@@ -1,5 +1,36 @@
 <?php
 
+// ========== CSRF Protection ==========
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+}
+
+function verifyCsrfToken() {
+    if (
+        empty($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    ) {
+        http_response_code(403);
+        die('Invalid CSRF token. Please go back and try again.');
+    }
+}
+
+function csrfField() {
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token']) . '">';
+}
+
+// ========== Validation Helpers ==========
+function isValidLength($value, $min = 1, $max = 255) {
+    $len = mb_strlen(trim($value));
+    return $len >= $min && $len <= $max;
+}
+
+function isEndAfterStart($start, $end) {
+    return strtotime($end) > strtotime($start);
+}
+
 function loginUser($user) {
      $_SESSION['user_id'] = $user['id'];
     $_SESSION['role']    = $user['role'];  
@@ -59,4 +90,13 @@ function timeAgo($dt) {
     if ($diff < 3600) return round($diff/60) . 'm ago';
     if ($diff < 86400) return round($diff/3600) . 'h ago';
     return round($diff/86400) . 'd ago';
+}
+
+// ========== Missing Validation Functions ==========
+function isValidEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function isPositiveInt($value) {
+    return filter_var($value, FILTER_VALIDATE_INT) !== false && (int)$value > 0;
 }

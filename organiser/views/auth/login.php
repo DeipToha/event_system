@@ -18,14 +18,17 @@
     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?page=login">
+    <form method="POST" action="index.php?page=login" id="login-form">
+        <?= csrfField() ?>
         <div class="form-group mb-2">
             <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" placeholder="your@email.com" required autofocus>
+            <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autofocus>
+            <span id="err-email" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <div class="form-group mb-2">
             <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••">
+            <span id="err-password" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <button type="submit" class="btn btn-primary w-full mt-2" style="justify-content:center;">Sign In</button>
     </form>

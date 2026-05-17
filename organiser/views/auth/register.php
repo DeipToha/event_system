@@ -22,11 +22,13 @@
     <?php endif; ?>
 
     <?php if (!isset($success) || !$success): ?>
-    <form method="POST" action="index.php?page=register" enctype="multipart/form-data">
+    <form method="POST" action="index.php?page=register" enctype="multipart/form-data" id="register-form">
+        <?= csrfField() ?>
         <div class="form-grid mb-2">
             <div class="form-group">
                 <label class="form-label">Full Name *</label>
-                <input type="text" name="name" class="form-control" placeholder="Your full name" required>
+                <input type="text" name="name" id="name" class="form-control" placeholder="Your full name">
+                <span id="err-name" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group">
                 <label class="form-label">Phone</label>
@@ -34,11 +36,13 @@
             </div>
             <div class="form-group form-full">
                 <label class="form-label">Email *</label>
-                <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com">
+                <span id="err-email" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group">
                 <label class="form-label">Password *</label>
-                <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Min 6 characters">
+                <span id="err-password" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group">
                 <label class="form-label">&nbsp;</label>
@@ -50,7 +54,8 @@
         <div class="form-grid mb-2">
             <div class="form-group form-full">
                 <label class="form-label">Organisation Name *</label>
-                <input type="text" name="org_name" class="form-control" placeholder="e.g. Dhaka Events Pro" required>
+                <input type="text" name="org_name" id="org_name" class="form-control" placeholder="e.g. Dhaka Events Pro">
+                <span id="err-org_name" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group form-full">
                 <label class="form-label">Description</label>
