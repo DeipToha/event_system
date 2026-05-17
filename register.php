@@ -26,7 +26,7 @@ if(isset($_POST['register']))
 
     if(mysqli_stmt_execute($stmt))
     {
-        echo "Registration Successful";
+        echo "Your account has been created.";
     }
     else
     {
@@ -72,6 +72,12 @@ if(isset($_POST['register']))
         <button type="submit" name="register">
             Register
         </button> 
+        <br>
+
+        <p>
+        Already have an account?
+        <a href="login.php">Back to Login</a>
+        </p>
 
     </form>
 
