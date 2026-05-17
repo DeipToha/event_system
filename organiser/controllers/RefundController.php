@@ -5,6 +5,11 @@ class RefundController {
         $org_id = $_SESSION['user_id'];
         $filter = $_GET['status'] ?? '';
 
+        // Validation — শুধু valid status accept করবে
+        if ($filter && !in_array($filter, ['pending', 'approved', 'rejected'])) {
+            $filter = '';
+        }
+
         $sql = "SELECT rr.*, b.ticket_code, b.total_price, e.title as event_title, u.name as attendee_name, u.email as attendee_email
                 FROM refund_requests rr
                 JOIN bookings b ON rr.booking_id=b.id
@@ -26,11 +31,23 @@ class RefundController {
 
     public function process() {
         if (!isPost()) redirect('index.php?page=refunds');
-        $db = getDB();
+
+        // CSRF check
+        verifyCsrfToken();
+
+        $db        = getDB();
         $org_id    = $_SESSION['user_id'];
         $refund_id = (int)($_POST['refund_id'] ?? 0);
         $action    = $_POST['action'] ?? '';
         $note      = sanitize($_POST['organiser_note'] ?? '');
+
+        // Validation
+        if ($refund_id <= 0) redirect('index.php?page=refunds');
+
+        if (!in_array($action, ['approve', 'reject'])) {
+            setFlash('error', 'Invalid action.');
+            redirect('index.php?page=refunds');
+        }
 
         // Verify ownership
         $stmt = $db->prepare("SELECT rr.* FROM refund_requests rr JOIN bookings b ON rr.booking_id=b.id JOIN events e ON b.event_id=e.id WHERE rr.id=? AND e.organiser_id=?");
@@ -39,9 +56,14 @@ class RefundController {
         $refund = $stmt->get_result()->fetch_assoc();
         if (!$refund) redirect('index.php?page=refunds');
 
+        // Already processed check
+        if ($refund['status'] !== 'pending') {
+            setFlash('error', 'This refund request has already been processed.');
+            redirect('index.php?page=refunds');
+        }
+
         if ($action === 'approve') {
             $status = 'approved';
-            // Mark booking as refunded
             $stmt2 = $db->prepare("UPDATE bookings SET status='refunded' WHERE id=?");
             $stmt2->bind_param("i", $refund['booking_id']);
             $stmt2->execute();
