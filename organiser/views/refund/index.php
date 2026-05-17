@@ -34,6 +34,7 @@
 
     <?php if ($r['status'] === 'pending'): ?>
     <form method="POST" action="index.php?page=refunds&action=process" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <?= csrfField() ?>
         <input type="hidden" name="refund_id" value="<?= $r['id'] ?>">
         <div class="form-group" style="flex:1;min-width:200px;">
             <label class="form-label">Note (optional)</label>
