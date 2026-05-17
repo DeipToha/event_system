@@ -4,11 +4,13 @@
 <div class="card">
     <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-    <form method="POST" action="index.php?page=events&action=edit&id=<?= $event['id'] ?>" enctype="multipart/form-data">
+    <form method="POST" action="index.php?page=events&action=edit&id=<?= $event['id'] ?>" enctype="multipart/form-data" id="event-form">
+        <?= csrfField() ?>
         <div class="form-grid mb-2">
             <div class="form-group form-full">
                 <label class="form-label">Event Title *</label>
-                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($event['title']) ?>" required>
+                <input type="text" name="title" id="title" class="form-control" value="<?= htmlspecialchars($event['title']) ?>">
+                <span id="err-title" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group form-full">
                 <label class="form-label">Description</label>
@@ -32,11 +34,13 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Event Start Date & Time *</label>
-                <input type="datetime-local" name="event_datetime" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($event['event_datetime'])) ?>" required>
+                <input type="datetime-local" name="event_datetime" id="event_datetime" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($event['event_datetime'])) ?>">
+                <span id="err-event_datetime" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
             <div class="form-group">
                 <label class="form-label">Event End Date & Time *</label>
-                <input type="datetime-local" name="end_datetime" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($event['end_datetime'])) ?>" required>
+                <input type="datetime-local" name="end_datetime" id="end_datetime" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($event['end_datetime'])) ?>">
+                <span id="err-end_datetime" style="color:var(--error,#e53e3e);font-size:12px;"></span>
             </div>
         </div>
 
