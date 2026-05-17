@@ -25,6 +25,7 @@
     <?php endif; ?>
 
     <form method="POST" action="index.php?page=reviews&action=reply">
+        <?= csrfField() ?>
         <input type="hidden" name="review_id" value="<?= $r['id'] ?>">
         <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
         <div class="flex gap-2">
