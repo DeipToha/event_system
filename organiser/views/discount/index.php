@@ -22,6 +22,7 @@
             <td><span class="badge <?= $c['is_active'] ? 'badge-approved' : 'badge-draft' ?>"><?= $c['is_active'] ? 'Active' : 'Inactive' ?></span></td>
             <td>
                 <form method="POST" action="index.php?page=discounts&action=toggle" style="display:inline;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="code_id" value="<?= $c['id'] ?>">
                     <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
                     <button type="submit" class="btn btn-secondary btn-sm"><?= $c['is_active'] ? 'Disable' : 'Enable' ?></button>
@@ -40,19 +41,23 @@
 <!-- Create Code -->
 <div class="card">
     <div class="card-title">Create Code</div>
-    <form method="POST" action="index.php?page=discounts&action=create">
+    <form method="POST" action="index.php?page=discounts&action=create" id="discount-form">
+        <?= csrfField() ?>
         <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
         <div class="form-group mb-2">
             <label class="form-label">Code *</label>
-            <input type="text" name="code" class="form-control" placeholder="e.g. SAVE20" style="text-transform:uppercase;" required>
+            <input type="text" name="code" id="disc_code" class="form-control" placeholder="e.g. SAVE20" style="text-transform:uppercase;">
+            <span id="err-disc_code" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <div class="form-group mb-2">
             <label class="form-label">Discount % *</label>
-            <input type="number" name="discount_pct" class="form-control" placeholder="20" min="1" max="100" required>
+            <input type="number" name="discount_pct" id="disc_pct" class="form-control" placeholder="20" min="1" max="100">
+            <span id="err-disc_pct" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <div class="form-group mb-2">
             <label class="form-label">Max Uses *</label>
-            <input type="number" name="max_uses" class="form-control" placeholder="50" min="1" required>
+            <input type="number" name="max_uses" id="disc_max_uses" class="form-control" placeholder="50" min="1">
+            <span id="err-disc_max_uses" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <div class="form-group mb-2">
             <label class="form-label">Valid Until</label>
