@@ -4,8 +4,16 @@ class BookingController {
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
-        $filter_tier   = (int)($_GET['tier_id'] ?? 0);
-        $filter_checkin= $_GET['checked_in'] ?? '';
+        $filter_tier    = (int)($_GET['tier_id'] ?? 0);
+        $filter_checkin = $_GET['checked_in'] ?? '';
+
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
+
+        if ($filter_checkin !== '' && !in_array($filter_checkin, ['0', '1'])) {
+            $filter_checkin = '';
+        }
 
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
