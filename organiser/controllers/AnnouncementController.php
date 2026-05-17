@@ -5,6 +5,9 @@ class AnnouncementController {
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
 
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
@@ -22,19 +25,30 @@ class AnnouncementController {
 
     public function send() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_POST['event_id'] ?? 0);
         $title    = sanitize($_POST['title'] ?? '');
         $body     = sanitize($_POST['body'] ?? '');
 
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT id FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
         if (!$stmt->get_result()->fetch_assoc()) redirect('index.php?page=events');
 
-        if (!$title || !$body) {
-            setFlash('error', 'Title and body are required.');
+        if (!isValidLength($title)) {
+            setFlash('error', 'Title is required.');
+        } elseif (!isValidLength($body)) {
+            setFlash('error', 'Message body is required.');
+        } elseif (!isValidLength($title, 1, 200)) {
+            setFlash('error', 'Title must be under 200 characters.');
         } else {
             $stmt2 = $db->prepare("INSERT INTO announcements (event_id, organiser_id, title, body) VALUES (?,?,?,?)");
             $stmt2->bind_param("iiss", $event_id, $org_id, $title, $body);
