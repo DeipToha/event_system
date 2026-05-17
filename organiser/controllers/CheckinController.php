@@ -6,6 +6,9 @@ class CheckinController {
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
 
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
@@ -17,15 +20,33 @@ class CheckinController {
 
     // AJAX endpoint — returns JSON
     public function ajaxCheckin() {
-        if (!isPost()) { jsonResponse(['success'=>false,'message'=>'Invalid request']); }
+        if (!isPost()) {
+            jsonResponse(['success' => false, 'message' => 'Invalid request.']);
+        }
+
+        // CSRF check for AJAX
+        $token = $_POST['csrf_token'] ?? '';
+        if (empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) {
+            jsonResponse(['success' => false, 'message' => 'Invalid CSRF token.']);
+        }
 
         $db = getDB();
         $org_id      = $_SESSION['user_id'];
         $ticket_code = sanitize($_POST['ticket_code'] ?? '');
         $event_id    = (int)($_POST['event_id'] ?? 0);
 
+        // Validation
         if (!$ticket_code) {
-            jsonResponse(['success'=>false,'message'=>'Please enter a ticket code.']);
+            jsonResponse(['success' => false, 'message' => 'Please enter a ticket code.']);
+        }
+
+        if ($event_id <= 0) {
+            jsonResponse(['success' => false, 'message' => 'Invalid event.']);
+        }
+
+        // ticket_code max length check
+        if (strlen($ticket_code) > 50) {
+            jsonResponse(['success' => false, 'message' => 'Invalid ticket code format.']);
         }
 
         // Verify ticket belongs to organiser's event
@@ -42,17 +63,17 @@ class CheckinController {
         $booking = $stmt->get_result()->fetch_assoc();
 
         if (!$booking) {
-            jsonResponse(['success'=>false,'message'=>'Invalid ticket code. No booking found.']);
+            jsonResponse(['success' => false, 'message' => 'Invalid ticket code. No booking found.']);
         }
 
         if ($booking['status'] !== 'active') {
-            jsonResponse(['success'=>false,'message'=>'Ticket is ' . $booking['status'] . ' and cannot be checked in.']);
+            jsonResponse(['success' => false, 'message' => 'Ticket is ' . $booking['status'] . ' and cannot be checked in.']);
         }
 
         if ($booking['checked_in']) {
             jsonResponse([
-                'success' => false,
-                'message' => 'Ticket already checked in at ' . formatDate($booking['checked_in_at']) . '.',
+                'success'  => false,
+                'message'  => 'Ticket already checked in at ' . formatDate($booking['checked_in_at']) . '.',
                 'attendee' => $booking['attendee_name'],
                 'tier'     => $booking['tier_name'],
             ]);
@@ -66,11 +87,11 @@ class CheckinController {
         $db->close();
 
         jsonResponse([
-            'success'  => true,
-            'message'  => 'Check-in successful!',
-            'attendee' => $booking['attendee_name'],
-            'tier'     => $booking['tier_name'],
-            'quantity' => $booking['quantity'],
+            'success'       => true,
+            'message'       => 'Check-in successful!',
+            'attendee'      => $booking['attendee_name'],
+            'tier'          => $booking['tier_name'],
+            'quantity'      => $booking['quantity'],
             'checked_in_at' => formatDate($now),
         ]);
     }
@@ -79,6 +100,9 @@ class CheckinController {
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
+
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
 
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
