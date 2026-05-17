@@ -27,15 +27,18 @@
 <div class="card">
     <div class="card-title">Send Announcement</div>
     <p class="text-muted text-sm mb-2">This will appear on all ticket holders' dashboards.</p>
-    <form method="POST" action="index.php?page=announcements&action=send">
+    <form method="POST" action="index.php?page=announcements&action=send" id="announcement-form">
+        <?= csrfField() ?>
         <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
         <div class="form-group mb-2">
             <label class="form-label">Title *</label>
-            <input type="text" name="title" class="form-control" placeholder="e.g. Schedule Update" required>
+            <input type="text" name="title" id="ann_title" class="form-control" placeholder="e.g. Schedule Update">
+            <span id="err-ann_title" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <div class="form-group mb-2">
             <label class="form-label">Message *</label>
-            <textarea name="body" class="form-control" rows="5" placeholder="Your message to all ticket holders..." required></textarea>
+            <textarea name="body" id="ann_body" class="form-control" rows="5" placeholder="Your message to all ticket holders..."></textarea>
+            <span id="err-ann_body" style="color:var(--error,#e53e3e);font-size:12px;"></span>
         </div>
         <button type="submit" class="btn btn-primary w-full">📢 Send to All Ticket Holders</button>
     </form>
