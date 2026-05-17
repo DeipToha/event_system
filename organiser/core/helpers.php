@@ -27,13 +27,6 @@ function isValidLength($value, $min = 1, $max = 255) {
     return $len >= $min && $len <= $max;
 }
 
-function isValidEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-}
-
-function isPositiveInt($value) {
-    return filter_var($value, FILTER_VALIDATE_INT) !== false && (int)$value > 0;
-}
 function isEndAfterStart($start, $end) {
     return strtotime($end) > strtotime($start);
 }
@@ -97,4 +90,13 @@ function timeAgo($dt) {
     if ($diff < 3600) return round($diff/60) . 'm ago';
     if ($diff < 86400) return round($diff/3600) . 'h ago';
     return round($diff/86400) . 'd ago';
+}
+
+// ========== Missing Validation Functions ==========
+function isValidEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function isPositiveInt($value) {
+    return filter_var($value, FILTER_VALIDATE_INT) !== false && (int)$value > 0;
 }
