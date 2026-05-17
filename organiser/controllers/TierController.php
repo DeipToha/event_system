@@ -6,6 +6,9 @@ class TierController {
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['event_id'] ?? 0);
 
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
         $stmt->execute();
@@ -18,14 +21,21 @@ class TierController {
         $tiers = $stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
         $flash = getFlash();
         $db->close();
-        require 'views/tier/manage.php';
+        require BASE_PATH . 'views/tier/manage.php';
     }
 
     public function create() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_POST['event_id'] ?? 0);
+
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
 
         // Verify ownership
         $stmt = $db->prepare("SELECT id FROM events WHERE id=? AND organiser_id=?");
@@ -40,9 +50,20 @@ class TierController {
         $sales_start = $_POST['sales_start'] ?? '';
         $sales_end   = $_POST['sales_end'] ?? '';
 
-        if (!$name || $price < 0 || $total_seats < 1) {
-            setFlash('error', 'Invalid tier data.');
+        // Validation
+        if (!isValidLength($name)) {
+            setFlash('error', 'Tier name is required.');
+        } elseif (!isValidLength($name, 1, 100)) {
+            setFlash('error', 'Tier name must be under 100 characters.');
+        } elseif ($price < 0) {
+            setFlash('error', 'Price cannot be negative.');
+        } elseif ($total_seats < 1) {
+            setFlash('error', 'Total seats must be at least 1.');
+        } elseif ($sales_start && $sales_end && !isEndAfterStart($sales_start, $sales_end)) {
+            setFlash('error', 'Sales end date must be after sales start date.');
         } else {
+            $sales_start = $sales_start ?: null;
+            $sales_end   = $sales_end   ?: null;
             $stmt2 = $db->prepare("INSERT INTO ticket_tiers (event_id, name, description, price, total_seats, sales_start, sales_end) VALUES (?,?,?,?,?,?,?)");
             $stmt2->bind_param("isssdss", $event_id, $name, $description, $price, $total_seats, $sales_start, $sales_end);
             $stmt2->execute();
@@ -57,13 +78,20 @@ class TierController {
         $org_id  = $_SESSION['user_id'];
         $tier_id = (int)($_GET['id'] ?? 0);
 
+        // Validation
+        if ($tier_id <= 0) redirect('index.php?page=events');
+
         $stmt = $db->prepare("SELECT t.*, e.organiser_id FROM ticket_tiers t JOIN events e ON t.event_id=e.id WHERE t.id=? AND e.organiser_id=?");
         $stmt->bind_param("ii", $tier_id, $org_id);
         $stmt->execute();
         $tier = $stmt->get_result()->fetch_assoc();
         if (!$tier) redirect('index.php?page=events');
 
+        $error = null;
         if (isPost()) {
+            // CSRF check
+            verifyCsrfToken();
+
             $name        = sanitize($_POST['name'] ?? '');
             $description = sanitize($_POST['description'] ?? '');
             $price       = (float)($_POST['price'] ?? 0);
@@ -71,22 +99,44 @@ class TierController {
             $sales_start = $_POST['sales_start'] ?? '';
             $sales_end   = $_POST['sales_end'] ?? '';
 
-            $stmt2 = $db->prepare("UPDATE ticket_tiers SET name=?, description=?, price=?, total_seats=?, sales_start=?, sales_end=? WHERE id=?");
-            $stmt2->bind_param("ssdsssi", $name, $description, $price, $total_seats, $sales_start, $sales_end, $tier_id);
-            $stmt2->execute();
-            $db->close();
-            setFlash('success', 'Tier updated.');
-            redirect('index.php?page=tiers&action=manage&event_id=' . $tier['event_id']);
+            // Validation
+            if (!isValidLength($name)) {
+                $error = 'Tier name is required.';
+            } elseif (!isValidLength($name, 1, 100)) {
+                $error = 'Tier name must be under 100 characters.';
+            } elseif ($price < 0) {
+                $error = 'Price cannot be negative.';
+            } elseif ($total_seats < 1) {
+                $error = 'Total seats must be at least 1.';
+            } elseif ($sales_start && $sales_end && !isEndAfterStart($sales_start, $sales_end)) {
+                $error = 'Sales end date must be after sales start date.';
+            } else {
+                $sales_start = $sales_start ?: null;
+                $sales_end   = $sales_end   ?: null;
+                $stmt2 = $db->prepare("UPDATE ticket_tiers SET name=?, description=?, price=?, total_seats=?, sales_start=?, sales_end=? WHERE id=?");
+                $stmt2->bind_param("ssdsssi", $name, $description, $price, $total_seats, $sales_start, $sales_end, $tier_id);
+                $stmt2->execute();
+                $db->close();
+                setFlash('success', 'Tier updated.');
+                redirect('index.php?page=tiers&action=manage&event_id=' . $tier['event_id']);
+            }
         }
         $db->close();
-        require 'views/tier/edit.php';
+        require BASE_PATH . 'views/tier/edit.php';
     }
 
     public function delete() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db = getDB();
         $org_id  = $_SESSION['user_id'];
         $tier_id = (int)($_POST['tier_id'] ?? 0);
+
+        // Validation
+        if ($tier_id <= 0) redirect('index.php?page=events');
 
         $stmt = $db->prepare("SELECT t.*, e.organiser_id FROM ticket_tiers t JOIN events e ON t.event_id=e.id WHERE t.id=? AND e.organiser_id=?");
         $stmt->bind_param("ii", $tier_id, $org_id);
