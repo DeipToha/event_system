@@ -58,6 +58,7 @@ class VenueController {
 
         $error = null;
         if (isPost()) {
+            verifyCsrfToken();
             $title   = sanitize($_POST['event_title_preview'] ?? '');
             $dates   = $_POST['requested_dates'] ?? '';
             $message = sanitize($_POST['message'] ?? '');
