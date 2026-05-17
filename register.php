@@ -74,10 +74,10 @@ if(isset($_POST['register']))
         </button> 
         <br>
 
-    <p>
+        <p>
         Already have an account?
         <a href="login.php">Back to Login</a>
-    </p>
+        </p>
 
     </form>
 
