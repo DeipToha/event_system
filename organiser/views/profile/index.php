@@ -5,6 +5,7 @@
 <div class="card">
     <div class="card-title">Organisation Profile</div>
     <form method="POST" action="index.php?page=profile&action=update" enctype="multipart/form-data">
+        <?= csrfField() ?>
         <div class="form-group mb-2">
             <label class="form-label">Full Name</label>
             <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>
@@ -46,6 +47,7 @@
 <div class="card">
     <div class="card-title">Change Password</div>
     <form method="POST" action="index.php?page=profile&action=changePassword">
+        <?= csrfField() ?>
         <div class="form-group mb-2">
             <label class="form-label">Current Password</label>
             <input type="password" name="current_password" class="form-control" required>
