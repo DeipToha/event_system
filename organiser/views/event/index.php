@@ -34,6 +34,7 @@
                 <?php if ($ev['status'] !== 'cancelled'): ?>
                 <!-- Status Change -->
                 <form method="POST" action="index.php?page=events&action=changeStatus" style="display:inline;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="event_id" value="<?= $ev['id'] ?>">
                     <?php if ($ev['status'] === 'draft'): ?>
                     <input type="hidden" name="status" value="published">
@@ -44,6 +45,7 @@
                     <?php endif; ?>
                 </form>
                 <form method="POST" action="index.php?page=events&action=changeStatus" style="display:inline;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="event_id" value="<?= $ev['id'] ?>">
                     <input type="hidden" name="status" value="cancelled">
                     <button type="submit" class="btn btn-danger btn-sm" data-confirm="Cancel this event? Attendees will be notified.">✖ Cancel</button>

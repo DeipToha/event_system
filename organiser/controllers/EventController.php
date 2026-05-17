@@ -25,6 +25,9 @@ class EventController {
 
         $error = null;
         if (isPost()) {
+            // CSRF check
+            verifyCsrfToken();
+
             $title          = sanitize($_POST['title'] ?? '');
             $description    = sanitize($_POST['description'] ?? '');
             $category_id    = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
@@ -41,20 +44,34 @@ class EventController {
                 $venue_override = sanitize($_POST['venue_name_override'] ?? '');
             }
 
-            if (!$title || !$event_dt || !$end_dt) {
-                $error = 'Title and dates are required.';
+            // Validation
+            if (!isValidLength($title)) {
+                $error = 'Event title is required.';
+            } elseif (!isValidLength($title, 1, 200)) {
+                $error = 'Title must be under 200 characters.';
+            } elseif (!$event_dt) {
+                $error = 'Event start date is required.';
+            } elseif (!$end_dt) {
+                $error = 'Event end date is required.';
+            } elseif (!isEndAfterStart($event_dt, $end_dt)) {
+                $error = 'End date must be after start date.';
             } else {
                 $banner = null;
                 if (!empty($_FILES['banner_image']['name'])) {
                     $banner = uploadFile($_FILES['banner_image'], BASE_PATH . 'public/uploads/banners/');
+                    if (!$banner) {
+                        $error = 'Invalid image file. Only JPG, PNG, GIF allowed.';
+                    }
                 }
-                $stmt2 = $db->prepare("INSERT INTO events (organiser_id, venue_id, category_id, title, description, venue_name_override, event_datetime, end_datetime, banner_image_path, status) VALUES (?,?,?,?,?,?,?,?,?,?)");
-                $stmt2->bind_param("iiisssssss", $org_id, $venue_id, $category_id, $title, $description, $venue_override, $event_dt, $end_dt, $banner, $status);
-                $stmt2->execute();
-                $new_id = $stmt2->insert_id;
-                $db->close();
-                setFlash('success', 'Event created successfully!');
-                redirect('index.php?page=tiers&action=manage&event_id=' . $new_id);
+                if (!$error) {
+                    $stmt2 = $db->prepare("INSERT INTO events (organiser_id, venue_id, category_id, title, description, venue_name_override, event_datetime, end_datetime, banner_image_path, status) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                    $stmt2->bind_param("iiisssssss", $org_id, $venue_id, $category_id, $title, $description, $venue_override, $event_dt, $end_dt, $banner, $status);
+                    $stmt2->execute();
+                    $new_id = $stmt2->insert_id;
+                    $db->close();
+                    setFlash('success', 'Event created successfully!');
+                    redirect('index.php?page=tiers&action=manage&event_id=' . $new_id);
+                }
             }
         }
         $db->close();
@@ -65,6 +82,9 @@ class EventController {
         $db = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_GET['id'] ?? 0);
+
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
 
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
@@ -80,6 +100,9 @@ class EventController {
 
         $error = null;
         if (isPost()) {
+            // CSRF check
+            verifyCsrfToken();
+
             $title          = sanitize($_POST['title'] ?? '');
             $description    = sanitize($_POST['description'] ?? '');
             $category_id    = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
@@ -95,18 +118,37 @@ class EventController {
                 $venue_override = sanitize($_POST['venue_name_override'] ?? '');
             }
 
-            $banner = $event['banner_image_path'];
-            if (!empty($_FILES['banner_image']['name'])) {
-                $newBanner = uploadFile($_FILES['banner_image'], BASE_PATH . 'public/uploads/banners/');
-                if ($newBanner) $banner = $newBanner;
-            }
+            // Validation
+            if (!isValidLength($title)) {
+                $error = 'Event title is required.';
+            } elseif (!isValidLength($title, 1, 200)) {
+                $error = 'Title must be under 200 characters.';
+            } elseif (!$event_dt) {
+                $error = 'Event start date is required.';
+            } elseif (!$end_dt) {
+                $error = 'Event end date is required.';
+            } elseif (!isEndAfterStart($event_dt, $end_dt)) {
+                $error = 'End date must be after start date.';
+            } else {
+                $banner = $event['banner_image_path'];
+                if (!empty($_FILES['banner_image']['name'])) {
+                    $newBanner = uploadFile($_FILES['banner_image'], BASE_PATH . 'public/uploads/banners/');
+                    if ($newBanner) {
+                        $banner = $newBanner;
+                    } else {
+                        $error = 'Invalid image file. Only JPG, PNG, GIF allowed.';
+                    }
+                }
 
-            $stmt3 = $db->prepare("UPDATE events SET title=?, description=?, category_id=?, venue_id=?, venue_name_override=?, event_datetime=?, end_datetime=?, banner_image_path=? WHERE id=? AND organiser_id=?");
-            $stmt3->bind_param("ssiissssii", $title, $description, $category_id, $venue_id, $venue_override, $event_dt, $end_dt, $banner, $event_id, $org_id);
-            $stmt3->execute();
-            $db->close();
-            setFlash('success', 'Event updated successfully!');
-            redirect('index.php?page=events');
+                if (!$error) {
+                    $stmt3 = $db->prepare("UPDATE events SET title=?, description=?, category_id=?, venue_id=?, venue_name_override=?, event_datetime=?, end_datetime=?, banner_image_path=? WHERE id=? AND organiser_id=?");
+                    $stmt3->bind_param("ssiissssii", $title, $description, $category_id, $venue_id, $venue_override, $event_dt, $end_dt, $banner, $event_id, $org_id);
+                    $stmt3->execute();
+                    $db->close();
+                    setFlash('success', 'Event updated successfully!');
+                    redirect('index.php?page=events');
+                }
+            }
         }
         $db->close();
         require BASE_PATH . 'views/event/edit.php';
@@ -114,12 +156,18 @@ class EventController {
 
     public function changeStatus() {
         if (!isPost()) redirect('index.php?page=events');
+
+        // CSRF check
+        verifyCsrfToken();
+
         $db       = getDB();
         $org_id   = $_SESSION['user_id'];
         $event_id = (int)($_POST['event_id'] ?? 0);
         $status   = $_POST['status'] ?? '';
 
-        if (!in_array($status, ['published','draft','cancelled'])) redirect('index.php?page=events');
+        // Validation
+        if ($event_id <= 0) redirect('index.php?page=events');
+        if (!in_array($status, ['published', 'draft', 'cancelled'])) redirect('index.php?page=events');
 
         $stmt = $db->prepare("SELECT * FROM events WHERE id=? AND organiser_id=?");
         $stmt->bind_param("ii", $event_id, $org_id);
